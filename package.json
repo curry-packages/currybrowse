@@ -1,0 +1,22 @@
+{
+    "name": "currybrowse",
+    "version": "0.5.0",
+    "author": "Michael Hanus <mh@informatik.uni-kiel.de>",
+    "synopsis": "A GUI to browse and analyze the modules of a Curry program",
+    "category": [ "Analysis" ],
+    "dependencies": {
+        "addtypes"     : ">= 0.0.1",
+        "cass-analysis": ">= 0.0.1",
+        "cass"         : ">= 0.0.1",
+        "importusage"  : ">= 0.0.1"
+    },
+    "configModule": "BrowsePackageConfig",
+    "executable": {
+        "name": "curry-browse",
+        "main": "BrowserGUI"
+    },
+    "source": {
+        "git": "https://git.ps.informatik.uni-kiel.de/curry-packages/currybrowse.git",
+        "tag": "$version"
+    }
+}
