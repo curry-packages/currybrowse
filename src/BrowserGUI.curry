@@ -31,11 +31,11 @@ import CASS.Doc       (getAnalysisDoc)
 import CASS.Server    (initializeAnalysisSystem,analyzeModuleForBrowser)
 import CASS.Registry  (functionAnalysisInfos)
 import ImportUsage    (showImportCalls)
+import ShowFlatCurry  (funcModule, leqFunc)
 
 import AnalysisTypes
 import BrowserAnalysis
 import CurryBrowseAnalysis.Dependency (callsDirectly,indirectlyDependent)
-import ShowFlatCurry   (funcModule, leqFunc)
 import ShowGraph
 
 import BrowsePackageConfig (packagePath, packageVersion)
@@ -66,7 +66,7 @@ start :: String -> IO ()
 start modpath = do
   initializeAnalysisSystem
   putStr "Please be patient, reading all interfaces..."
-  helptxt <- readFile (browserDir </> "README")
+  helptxt <- readFile (browserDir </> "README.txt")
   mods <- getImportedInterfaces modpath
   putStrLn "done"
   let mainmod = progName (progOfIFFP (snd (head mods)))
@@ -381,7 +381,7 @@ browserGUI gstate rmod rtxt names =
             Label [FillX],
             MenuButton
               [Text "Help...",
-               Menu [MButton (showMBusy (help "README"))
+               Menu [MButton (showMBusy (help "README.txt"))
                              "About CurryBrowser",
                      MSeparator,
                      MButton (showMBusy (help "Help.txt"))
@@ -427,7 +427,7 @@ browserGUI gstate rmod rtxt names =
 
   -- show info texts:
   help localhelpfile gp =
-    readFile (browserDir </> "include" </> localhelpfile) >>= putMainMessage gp
+    readFile (browserDir </> localhelpfile) >>= putMainMessage gp
 
   -- show business while executing an event handler:
   showBusy handler gp = do
