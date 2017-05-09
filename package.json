@@ -1,19 +1,19 @@
 {
     "name": "currybrowse",
-    "version": "0.5.0",
+    "version": "2.0.0",
     "author": "Michael Hanus <mh@informatik.uni-kiel.de>",
     "synopsis": "A GUI to browse and analyze the modules of a Curry program",
     "category": [ "Analysis" ],
     "dependencies": {
-        "addtypes"     : ">= 0.0.1",
-        "cass-analysis": ">= 0.0.1",
-        "cass"         : ">= 0.0.1",
+        "addtypes"     : ">= 2.0.0",
+        "cass-analysis": ">= 2.0.0",
+        "cass"         : ">= 2.0.0",
         "importusage"  : ">= 0.0.1",
         "showflatcurry": ">= 0.0.1"
     },
     "compilerCompatibility": {
-        "pakcs": ">= 1.14.0, < 2.0.0",
-        "kics2": ">= 0.5.0, < 2.0.0"
+        "pakcs": ">= 2.0.0",
+        "kics2": ">= 2.0.0"
     },
     "configModule": "BrowsePackageConfig",
     "executable": {

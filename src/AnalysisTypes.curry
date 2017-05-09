@@ -46,4 +46,4 @@ data ContentsKind =
   | LCurryProg     -- Literate Curry source code
   | FlatCurryExp   -- FlatCurry expression
   | OtherText      -- some other text
-
+ deriving Eq

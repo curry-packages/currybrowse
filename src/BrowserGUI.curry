@@ -49,7 +49,7 @@ showExecTime = True
 ---------------------------------------------------------------------
 -- Title and version
 title :: String
-title = "CurryBrowser (Version " ++ packageVersion ++ " of 22/01/2017)"
+title = "CurryBrowser (Version " ++ packageVersion ++ " of 09/05/2017)"
 
 ---------------------------------------------------------------------
 -- Main program: check arguments, read interfaces, and run GUI:
@@ -137,7 +137,7 @@ changeTrees n (Node t v subtrees : trees) =
                     return (Node t v nsts : trees)
                else changeTrees (n-l) trees >>= \nts -> return (Node t v subtrees : nts)
 
-openNode :: (a, [(a, [String])]) -> IO [Tree (String, [(a, [String])])]
+openNode :: Eq a => (a, [(a, [String])]) -> IO [Tree (String, [(a, [String])])]
 openNode (mod,modimps) = let mbimps = lookup mod modimps in
   return $  maybe [] (map (\m->Leaf m (m,modimps))) mbimps
 
@@ -621,7 +621,7 @@ browserGUI gstate rmod rtxt names =
     self <- getValue rfun gp
     fana <- getCurrentFunctionAnalysis gstate
     funs <- getFuns gstate
-    if mod==Nothing || null self || fana==Nothing then done else do
+    if isNothing mod || null self || isNothing fana then done else do
       result <- performAnalysis (fromJust fana) (showDoing gp)
                                 (funs!!readNat self)
       showAnalysisResult result gp
@@ -756,7 +756,7 @@ findFunDeclInProgText FlatCurryExp progtext fname =
 findFunDeclInProgText OtherText _ _ = 0
 
 -- finds first declaration line:
-findFirstDeclLine :: [a] -> [[a]] -> Int -> Int
+findFirstDeclLine :: Eq a => [a] -> [[a]] -> Int -> Int
 findFirstDeclLine _ [] _ = 0 -- not found
 findFirstDeclLine f (l:ls) n =
      if isPrefixOf f l then n else findFirstDeclLine f ls (n+1)
