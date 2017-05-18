@@ -24,19 +24,18 @@ import Maybe
 import Read
 import Sort            (sortBy)
 import System
-import Time            (toCalendarTime,calendarTimeToString)
+import Time            (toCalendarTime, calendarTimeToString)
 
 import Analysis.Types (AOutFormat(..))
 import CASS.Doc       (getAnalysisDoc)
-import CASS.Server    (initializeAnalysisSystem,analyzeModuleForBrowser)
+import CASS.Server    (initializeAnalysisSystem, analyzeModuleForBrowser)
 import CASS.Registry  (functionAnalysisInfos)
 import ImportUsage    (showImportCalls)
 import ShowFlatCurry  (funcModule, leqFunc)
-
+import ShowDotGraph   (getDotViewCmd, setDotViewCmd)
 import AnalysisTypes
 import BrowserAnalysis
 import CurryBrowseAnalysis.Dependency (callsDirectly,indirectlyDependent)
-import ShowGraph
 
 import BrowsePackageConfig (packagePath, packageVersion)
 
@@ -49,7 +48,7 @@ showExecTime = True
 ---------------------------------------------------------------------
 -- Title and version
 title :: String
-title = "CurryBrowser (Version " ++ packageVersion ++ " of 09/05/2017)"
+title = "CurryBrowser (Version " ++ packageVersion ++ " of 18/05/2017)"
 
 ---------------------------------------------------------------------
 -- Main program: check arguments, read interfaces, and run GUI:
@@ -537,8 +536,9 @@ browserGUI gstate rmod rtxt names =
     safeIO gp $
        viewDependencyGraph
          (concatMap (\(Prog mod imps _ _ _) ->
-                          if mod=="Prelude" then []
-                                            else [(mod,[],delete "Prelude" imps)]) mods)
+                          if mod=="Prelude"
+                            then []
+                            else [(mod,[],delete "Prelude" imps)]) mods)
 
   -- show import calls of selected module:
   showImpCalls mod gp =

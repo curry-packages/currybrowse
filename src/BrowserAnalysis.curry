@@ -5,11 +5,13 @@
 -- add access to a new analysis here and recompile the browser.
 -----------------------------------------------------------------------------
 
-module BrowserAnalysis( moduleAnalyses, allFunctionAnalyses, functionAnalyses)
+module BrowserAnalysis
+  ( moduleAnalyses, allFunctionAnalyses, functionAnalyses
+  , viewDependencyGraph )
  where
 
-import FileGoodies(stripSuffix)
-import List(intersperse)
+import FileGoodies ( stripSuffix )
+import List        ( intersperse, nub, (\\) )
 
 import FlatCurry.Types
 import FlatCurry.Goodies (funcName)
@@ -32,7 +34,7 @@ import CurryBrowseAnalysis.CalledByAnalysis
 import CurryBrowseAnalysis.Linearity
 
 import ShowFlatCurry
-import ShowGraph
+import ShowDotGraph
 
 infix 1 `showWith`,`showWithMsg`
 
@@ -285,6 +287,15 @@ showDGraph (mod,_) isExt fnames =
 
   -- dot attributes for visualization of external function nodes:
   extAttrs = [("style","filled"),("color",".7 .3 1.0")]
+
+viewDependencyGraph :: [(String,[(String,String)],[String])] -> IO ()
+viewDependencyGraph deps = viewDotGraph $ Graph "dependencies" nodes edges
+ where
+  nodes = map (\ (n,a,_) -> Node n a) deps ++
+          map (\ n -> Node n [])
+              (concatMap (\ (_,_,ts) -> ts) deps \\ map (\ (n,_,_) -> n) deps)
+  edges = map (\ (s,t) -> Edge s t [])
+              (nub (concatMap (\ (p,_,ds) -> map (\d -> (p,d)) ds) deps))
 
 --------------------------------------------------------------------------------
 -- Auxiliary operation to integrate a CASS analysis for an individual
