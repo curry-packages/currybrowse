@@ -8,6 +8,7 @@
         "addtypes"     : ">= 0.0.1",
         "cass-analysis": ">= 0.0.1",
         "cass"         : ">= 0.0.1",
+        "flatcurry"    : ">= 1.0.0",
         "graphviz"     : ">= 0.0.1",
         "importusage"  : ">= 0.0.1",
         "showflatcurry": ">= 0.0.1"
