@@ -1,29 +1,30 @@
 {
-    "name": "currybrowse",
-    "version": "2.0.0",
-    "author": "Michael Hanus <mh@informatik.uni-kiel.de>",
-    "synopsis": "A GUI to browse and analyze the modules of a Curry program",
-    "category": [ "Analysis" ],
-    "dependencies": {
-        "addtypes"     : ">= 2.0.0",
-        "cass-analysis": ">= 2.0.0",
-        "cass"         : ">= 2.0.0",
-        "flatcurry"    : ">= 2.0.0",
-        "graphviz"     : ">= 2.0.0",
-        "importusage"  : ">= 0.0.1",
-        "showflatcurry": ">= 0.0.1"
-    },
-    "compilerCompatibility": {
-        "pakcs": ">= 2.0.0",
-        "kics2": ">= 2.0.0"
-    },
-    "configModule": "BrowsePackageConfig",
-    "executable": {
-        "name": "curry-browse",
-        "main": "BrowserGUI"
-    },
-    "source": {
-        "git": "https://git.ps.informatik.uni-kiel.de/curry-packages/currybrowse.git",
-        "tag": "$version"
-    }
+  "name": "currybrowse",
+  "version": "2.0.0",
+  "author": "Michael Hanus <mh@informatik.uni-kiel.de>",
+  "synopsis": "A GUI to browse and analyze the modules of a Curry program",
+  "category": [ "Analysis" ],
+  "dependencies": {
+    "addtypes": " >= 2.0.0",
+    "cass-analysis": " >= 2.0.0",
+    "cass": " >= 2.0.0",
+    "flatcurry": " >= 2.0.0",
+    "graphviz": " >= 2.0.0",
+    "importusage": " >= 0.0.1",
+    "showflatcurry": " >= 0.0.1",
+    "gui": " >= 2.0.0"
+  },
+  "compilerCompatibility": {
+    "pakcs": " >= 2.0.0",
+    "kics2": " >= 2.0.0"
+  },
+  "source": {
+    "git": "https://git.ps.informatik.uni-kiel.de/curry-packages/currybrowse.git",
+    "tag": "$version"
+  },
+  "configModule": "BrowsePackageConfig",
+  "executable": {
+    "name": "curry-browse",
+    "main": "BrowserGUI"
+  }
 }
