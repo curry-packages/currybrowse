@@ -10,6 +10,7 @@
         "cass"         : ">= 0.0.1",
         "flatcurry"    : ">= 1.0.0",
         "graphviz"     : ">= 0.0.1",
+        "gui"          : ">= 1.0.0",
         "importusage"  : ">= 0.0.1",
         "showflatcurry": ">= 0.0.1"
     },
