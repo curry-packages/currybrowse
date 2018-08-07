@@ -10,8 +10,8 @@ module BrowserAnalysis
   , viewDependencyGraph )
  where
 
-import FileGoodies ( stripSuffix )
-import List        ( intersperse, nub, (\\) )
+import Data.List       ( intersperse, nub, (\\) )
+import System.FilePath ( dropExtension )
 
 import FlatCurry.Types
 import FlatCurry.Goodies (funcName)
@@ -65,7 +65,7 @@ addTypes fname
  | take 7 (reverse fname) == "yrrucl."
   = return (ContentsResult OtherText "Can't add types to literate programs")
  | otherwise
-  = do prog <- addTypeSignatures (stripSuffix fname)
+  = do prog <- addTypeSignatures (dropExtension fname)
        return (ContentsResult CurryProg prog)
 
 -----------------------------------------------------------------------------

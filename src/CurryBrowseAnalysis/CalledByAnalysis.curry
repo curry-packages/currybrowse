@@ -7,7 +7,7 @@
 module CurryBrowseAnalysis.CalledByAnalysis(calledBy) where
 
 import FlatCurry.Types
-import List
+import Data.List
 
 -- Computes the list of all functions that calls some function.
 -- Argument: a list of function declarations
@@ -36,4 +36,3 @@ isCalled name (Case _ _ ces) = any isCalledCase ces
 isCalled name (Typed e _) = isCalled name e
 
 -- end of CalledByAnalysis
-

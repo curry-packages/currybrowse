@@ -10,10 +10,10 @@ module CurryBrowseAnalysis.Dependency
                   dependencyGraphs, localDependencyGraphs) where
 
 import FlatCurry.Types
-import List
-import SetRBT
-import Sort(leqString)
-import Maybe(fromJust)
+import Data.List
+import Data.Maybe (fromJust)
+import qualified Data.Set.RBTree as Set
+import Sort (leqString)
 
 -- Generic global function analysis where the property of each function is a combination
 -- of a property of the function and all its dependent functions.
@@ -51,29 +51,29 @@ externalDependent funcs =
 -- Result: a list of pairs of qualified functions names and the corresponding
 --         called functions
 indirectlyDependent :: [FuncDecl] -> [(QName,[QName])]
-indirectlyDependent funs = map (\ (f,ds) -> (f,setRBT2list ds))
+indirectlyDependent funs = map (\ (f,ds) -> (f,Set.toList ds))
                                (depsClosure (map directlyDependent funs))
 
 -- list of direct dependencies for a function
 callsDirectly :: FuncDecl -> [QName]
-callsDirectly fun = setRBT2list (snd (directlyDependent fun))
+callsDirectly fun = Set.toList (snd (directlyDependent fun))
 
 -- set of direct dependencies for a function
-directlyDependent :: FuncDecl -> (QName,SetRBT QName)
+directlyDependent :: FuncDecl -> (QName,Set.SetRBT QName)
 directlyDependent (Func f _ _ _ (Rule _ e))   = (f,funcSetOfExpr e)
-directlyDependent (Func f _ _ _ (External _)) = (f,emptySet)
+directlyDependent (Func f _ _ _ (External _)) = (f,Set.empty)
 
 -- compute the transitive closure of all dependencies based on a list of
 -- direct dependencies:
-depsClosure :: [(QName,SetRBT QName)] -> [(QName,SetRBT QName)]
-depsClosure directdeps = map (\(f,ds)->(f,closure ds (setRBT2list ds)))
+depsClosure :: [(QName,Set.SetRBT QName)] -> [(QName,Set.SetRBT QName)]
+depsClosure directdeps = map (\(f,ds)->(f,closure ds (Set.toList ds)))
                              directdeps
  where
   closure olddeps [] = olddeps
   closure olddeps (f:fs) =
-     let newdeps = filter (\e->not (elemRBT e olddeps))
-                          (setRBT2list (maybe emptySet id (lookup f directdeps)))
-      in closure (foldr insertRBT olddeps newdeps) (newdeps++fs)
+     let newdeps = filter (\e->not (Set.member e olddeps))
+                          (Set.toList (maybe Set.empty id (lookup f directdeps)))
+      in closure (foldr Set.insert olddeps newdeps) (newdeps++fs)
 
 -- Computes the list of all direct dependencies for all functions.
 -- This is useful to represent the dependency graph for each function.
@@ -83,8 +83,8 @@ depsClosure directdeps = map (\(f,ds)->(f,closure ds (setRBT2list ds)))
 dependencyGraphs :: [FuncDecl] -> [(QName,[(QName,[QName])])]
 dependencyGraphs funs =
   let directdeps = map directlyDependent funs
-   in map (\(f,ds) -> (f,map (\g->(g,setRBT2list (fromJust (lookup g directdeps))))
-                             (setRBT2list (insertRBT f ds))))
+   in map (\(f,ds) -> (f,map (\g->(g,Set.toList (fromJust (lookup g directdeps))))
+                             (Set.toList (Set.insert f ds))))
           (depsClosure directdeps)
 
 -- Computes for all functions the list of all direct local dependencies, i.e.,
@@ -98,42 +98,42 @@ localDependencyGraphs :: [FuncDecl] -> [(QName,[(QName,[QName])])]
 localDependencyGraphs funs =
   let directdeps = map directlyDependent funs
    in map (\(f,ds) -> (f,map (\g->(g,if fst f == fst g
-                                     then setRBT2list (fromJust (lookup g directdeps))
+                                     then Set.toList (fromJust (lookup g directdeps))
                                      else []))
-                             (setRBT2list (insertRBT f ds))))
+                             (Set.toList (Set.insert f ds))))
           (localDepsClosure directdeps)
 
 -- compute the transitive closure of all local dependencies based on a list of
 -- direct dependencies:
-localDepsClosure :: [(QName,SetRBT QName)] -> [(QName,SetRBT QName)]
+localDepsClosure :: [(QName,Set.SetRBT QName)] -> [(QName,Set.SetRBT QName)]
 localDepsClosure directdeps =
-  map (\(f,ds)->(f,closure (fst f) ds (setRBT2list ds))) directdeps
+  map (\(f,ds)->(f,closure (fst f) ds (Set.toList ds))) directdeps
  where
   closure _ olddeps [] = olddeps
   closure mod olddeps (f:fs)
    | mod == fst f  -- f is local in this module: add dependencies
-    = let newdeps = filter (\e->not (elemRBT e olddeps))
-                           (setRBT2list (maybe emptySet id (lookup f directdeps)))
-       in closure mod (foldr insertRBT olddeps newdeps) (newdeps++fs)
+    = let newdeps = filter (\e->not (Set.member e olddeps))
+                           (Set.toList (maybe Set.empty id (lookup f directdeps)))
+       in closure mod (foldr Set.insert olddeps newdeps) (newdeps++fs)
    | otherwise = closure mod olddeps fs
 
 -- Gets a list of all functions (including partially applied functions)
 -- called in an expression:
 funcsInExpr :: Expr -> [QName]
-funcsInExpr e = setRBT2list (funcSetOfExpr e)
+funcsInExpr e = Set.toList (funcSetOfExpr e)
 
 -- Gets the set of all functions (including partially applied functions)
 -- called in an expression:
-funcSetOfExpr :: Expr -> SetRBT QName
-funcSetOfExpr (Var _) = emptySet
-funcSetOfExpr (Lit _) = emptySet
+funcSetOfExpr :: Expr -> Set.SetRBT QName
+funcSetOfExpr (Var _) = Set.empty
+funcSetOfExpr (Lit _) = Set.empty
 funcSetOfExpr (Comb ct f es) =
   if isConstructorComb ct then unionMap funcSetOfExpr es
-                          else insertRBT f (unionMap funcSetOfExpr es)
+                          else Set.insert f (unionMap funcSetOfExpr es)
 funcSetOfExpr (Free _ e) = funcSetOfExpr e
-funcSetOfExpr (Let bs e) = unionRBT (unionMap (funcSetOfExpr . snd) bs) (funcSetOfExpr e)
-funcSetOfExpr (Or e1 e2) = unionRBT (funcSetOfExpr e1) (funcSetOfExpr e2)
-funcSetOfExpr (Case _ e bs) = unionRBT (funcSetOfExpr e) (unionMap funcSetOfBranch bs)
+funcSetOfExpr (Let bs e) = Set.union (unionMap (funcSetOfExpr . snd) bs) (funcSetOfExpr e)
+funcSetOfExpr (Or e1 e2) = Set.union (funcSetOfExpr e1) (funcSetOfExpr e2)
+funcSetOfExpr (Case _ e bs) = Set.union (funcSetOfExpr e) (unionMap funcSetOfBranch bs)
                      where funcSetOfBranch (Branch _ be) = funcSetOfExpr be
 funcSetOfExpr (Typed e _) = funcSetOfExpr e
 
@@ -143,14 +143,8 @@ isConstructorComb ct = case ct of
   ConsPartCall _ -> True
   _              -> False
 
-unionMap :: (a -> SetRBT QName) -> [a] -> SetRBT QName
-unionMap f = foldr unionRBT emptySet . map f
+unionMap :: (a -> Set.SetRBT QName) -> [a] -> Set.SetRBT QName
+unionMap f = foldr Set.union Set.empty . map f
 
-emptySet :: SetRBT QName
-emptySet = emptySetRBT leqQName
-
-leqQName :: QName -> QName -> Bool
-leqQName (m1,n1) (m2,n2) = leqString (m1++('.':n1)) (m2++('.':n2))
 
 -- end of Dependency
-

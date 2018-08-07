@@ -9,7 +9,7 @@
 module CurryBrowseAnalysis.SolutionComplete(analyseSolutionComplete)   where
 
 import FlatCurry.Types
-import List
+import Data.List
 import CurryBrowseAnalysis.Dependency
 
 ------------------------------------------------------------------------------
