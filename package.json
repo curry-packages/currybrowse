@@ -12,7 +12,8 @@
     "graphviz"     : " >= 3.0.0",
     "importusage"  : " >= 2.0.0",
     "showflatcurry": " >= 2.0.0",
-    "gui"          : " >= 2.0.0"
+    "gui"          : " >= 2.0.0",
+    "base"         : " >= 2.0.0"
   },
   "compilerCompatibility": {
     "pakcs": " >= 2.0.0",

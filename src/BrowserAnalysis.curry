@@ -289,7 +289,7 @@ showDGraph (mod,_) isExt fnames =
   extAttrs = [("style","filled"),("color",".7 .3 1.0")]
 
 viewDependencyGraph :: [(String,[(String,String)],[String])] -> IO ()
-viewDependencyGraph deps = viewDotGraph $ Graph "dependencies" nodes edges
+viewDependencyGraph deps = viewDotGraph $ dgraph "dependencies" nodes edges
  where
   nodes = map (\ (n,a,_) -> Node n a) deps ++
           map (\ n -> Node n [])
