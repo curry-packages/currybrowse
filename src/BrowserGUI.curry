@@ -3,15 +3,15 @@
 --- programs.
 ---
 --- @author Michael Hanus
---- @version January 2017
+--- @version December 2018
 ---------------------------------------------------------------------
 
 module BrowserGUI where
 
 import Directory
-import Distribution
+import Distribution    ( curryCompiler )
 import FileGoodies
-import FilePath        ((</>))
+import FilePath        ( (</>) )
 import FlatCurry.Types
 import FlatCurry.Files
 import FlatCurry.Goodies
@@ -19,25 +19,27 @@ import FlatCurry.Show
 import GUI
 import Imports
 import IOExts
-import List            (isPrefixOf,delete,union)
+import List            ( isPrefixOf, delete, union )
 import Maybe
 import Read
-import Sort            (sortBy)
+import Sort            ( sortBy )
 import System
-import Time            (toCalendarTime, calendarTimeToString)
+import Time            ( toCalendarTime, calendarTimeToString )
 
-import Analysis.Types (AOutFormat(..))
-import CASS.Doc       (getAnalysisDoc)
-import CASS.Server    (initializeAnalysisSystem, analyzeModuleForBrowser)
-import CASS.Registry  (functionAnalysisInfos)
-import ImportUsage    (showImportCalls)
-import ShowFlatCurry  (funcModule, leqFunc)
-import ShowDotGraph   (getDotViewCmd, setDotViewCmd)
+import Analysis.Types   ( AOutFormat(..) )
+import CASS.Doc         ( getAnalysisDoc )
+import CASS.Server      ( initializeAnalysisSystem, analyzeModuleForBrowser )
+import CASS.Registry    ( functionAnalysisInfos )
+import System.CurryPath ( getLoadPathForModule, modNameToPath
+                        , stripCurrySuffix )
+import ImportUsage      ( showImportCalls )
+import ShowFlatCurry    ( funcModule, leqFunc )
+import ShowDotGraph     ( getDotViewCmd, setDotViewCmd )
+
 import AnalysisTypes
 import BrowserAnalysis
-import CurryBrowseAnalysis.Dependency (callsDirectly,indirectlyDependent)
-
-import BrowsePackageConfig (packagePath, packageVersion)
+import BrowsePackageConfig            ( packagePath, packageVersion )
+import CurryBrowseAnalysis.Dependency ( callsDirectly,indirectlyDependent )
 
 ---------------------------------------------------------------------
 -- Set this constant to True if the execution times of the main operations

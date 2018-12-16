@@ -1,18 +1,20 @@
------------------------------------------------------------------
+-------------------------------------------------------------------------
 -- A library to get the import structures of a program.
+-------------------------------------------------------------------------
 
 module Imports(getImportedInterfaces,moduleImports,readFlatCurryFileInLoadPath,
                InterfaceOrFlatProg(..),ifOrProg,progOfIFFP)
   where
 
+import Directory
+import FileGoodies
+import Maybe
+
 import FlatCurry.Types
 import FlatCurry.Files
 import FlatCurry.Goodies
 import FlatCurry.Read
-import FileGoodies
-import Distribution(getLoadPathForModule)
-import Directory
-import Maybe
+import System.CurryPath  ( getLoadPathForModule )
 
 --- Get all interfaces (i.e., main and all indirectly imported modules)
 --- of a program:
