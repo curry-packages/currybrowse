@@ -13,6 +13,7 @@
       "flatcurry"     : ">= 2.0.0",
       "graphviz"      : ">= 2.0.0",
       "importusage"   : ">= 0.0.1",
+      "redblacktree"  : ">= 0.0.1",
       "showflatcurry" : ">= 0.0.1",
       "gui"           : ">= 2.0.0"
   },
