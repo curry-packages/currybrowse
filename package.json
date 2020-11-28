@@ -4,6 +4,8 @@
   "author": "Michael Hanus <mh@informatik.uni-kiel.de>",
   "synopsis": "A GUI to browse and analyze the modules of a Curry program",
   "category": [ "Analysis" ],
+  "license": "BSD-3-Clause",
+  "licenseFile": "LICENSE",
   "dependencies": {
       "addtypes"      : ">= 2.0.0",
       "base"          : ">= 1.0.0, < 2.0.0",
@@ -18,8 +20,8 @@
       "gui"           : ">= 2.0.0"
   },
   "compilerCompatibility": {
-    "pakcs": " >= 2.0.0",
-    "kics2": " >= 2.0.0"
+    "pakcs": " >= 2.0.0, < 3.0.0",
+    "kics2": " >= 2.0.0, < 3.0.0"
   },
   "source": {
     "git": "https://git.ps.informatik.uni-kiel.de/curry-packages/currybrowse.git",
