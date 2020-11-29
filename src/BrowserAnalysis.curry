@@ -10,17 +10,17 @@ module BrowserAnalysis
   , viewDependencyGraph )
  where
 
-import FileGoodies ( stripSuffix )
-import List        ( intersperse, nub, (\\) )
+import Data.List   ( intersperse, nub, (\\) )
 
 import FlatCurry.Types
 import FlatCurry.Goodies (funcName)
 import FlatCurry.Show    (showFlatFunc, showFlatProg)
 
-import Analysis.Types (AOutFormat(..))
-import CASS.Server    (analyzeFunctionForBrowser)
-import CASS.Registry  (functionAnalysisInfos)
+import Analysis.Types   (AOutFormat(..))
+import CASS.Server      (analyzeFunctionForBrowser)
+import CASS.Registry    (functionAnalysisInfos)
 import AddTypes
+import System.CurryPath ( stripCurrySuffix )
 
 import AnalysisTypes
 import Imports
@@ -65,7 +65,7 @@ addTypes fname
  | take 7 (reverse fname) == "yrrucl."
   = return (ContentsResult OtherText "Can't add types to literate programs")
  | otherwise
-  = do prog <- addTypeSignatures (stripSuffix fname)
+  = do prog <- addTypeSignatures (stripCurrySuffix fname)
        return (ContentsResult CurryProg prog)
 
 -----------------------------------------------------------------------------

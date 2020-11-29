@@ -1,15 +1,20 @@
 ------------------------------------------------------------------------------
--- Indeterminism analysis:
--- check whether functions are indeterministic, i.e., contain an
--- indirect/implicit call to a committed choice.
---
--- Michael Hanus, June 2005
+--- Indeterminism analysis:
+--- check whether functions are indeterministic, i.e., contain an
+--- indirect/implicit call to a committed choice.
+---
+--- @author Michael Hanus
+--- @version November 2020
 ------------------------------------------------------------------------------
 
-module CurryBrowseAnalysis.Indeterminism(analyseIndeterminism,choiceInExpr) where
+module CurryBrowseAnalysis.Indeterminism
+  ( analyseIndeterminism, choiceInExpr )
+ where
+
+import Data.List
 
 import FlatCurry.Types
-import List
+
 import CurryBrowseAnalysis.Dependency
 
 ------------------------------------------------------------------------------

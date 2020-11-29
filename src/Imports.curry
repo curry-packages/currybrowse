@@ -2,19 +2,19 @@
 -- A library to get the import structures of a program.
 -------------------------------------------------------------------------
 
-module Imports(getImportedInterfaces,moduleImports,readFlatCurryFileInLoadPath,
-               InterfaceOrFlatProg(..),ifOrProg,progOfIFFP)
-  where
+module Imports
+  ( getImportedInterfaces, moduleImports, readFlatCurryFileInLoadPath
+  , InterfaceOrFlatProg(..), ifOrProg, progOfIFFP )
+ where
 
-import Directory
-import FileGoodies
-import Maybe
+import Data.Maybe
 
 import FlatCurry.Types
 import FlatCurry.Files
 import FlatCurry.Goodies
 import FlatCurry.Read
 import System.CurryPath  ( getLoadPathForModule )
+import System.Directory
 
 --- Get all interfaces (i.e., main and all indirectly imported modules)
 --- of a program:
@@ -43,14 +43,14 @@ progOfIFFP (FP prog) = prog
 -- Read an existing(!) FlatCurry file w.r.t. current load path:
 readFlatCurryFileInLoadPath :: (String -> IO _) -> String -> [String] -> IO Prog
 readFlatCurryFileInLoadPath prt mod loadpath = do
-  mbfcyfile <- lookupFileInPath (flatCurryFileName mod) [""] loadpath
+  mbfcyfile <- findFileWithSuffix (flatCurryFileName mod) [""] loadpath
   maybe (error $ "FlatCurry file of module "++mod++" not found!")
         (readFlatCurryFileAndReport prt mod)
         mbfcyfile
 
 readFlatCurryFileAndReport :: (String -> IO _) -> String -> String -> IO Prog
 readFlatCurryFileAndReport prt mod filename = do
-  size <- fileSize filename
+  size <- getFileSize filename
   prt $ "Reading FlatCurry file of module '"++mod++"' ("++show size++" bytes)..."
   prog <- readFlatCurryFile filename
   seq (prog==prog) (return prog)

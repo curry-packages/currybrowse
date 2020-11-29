@@ -1,27 +1,26 @@
 {
   "name": "currybrowse",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "author": "Michael Hanus <mh@informatik.uni-kiel.de>",
   "synopsis": "A GUI to browse and analyze the modules of a Curry program",
   "category": [ "Analysis" ],
   "license": "BSD-3-Clause",
   "licenseFile": "LICENSE",
   "dependencies": {
-      "addtypes"      : ">= 2.0.0",
-      "base"          : ">= 1.0.0, < 2.0.0",
-      "cass-analysis" : ">= 2.0.0",
-      "cass"          : ">= 2.0.0",
-      "currypath"     : ">= 0.0.1",
-      "flatcurry"     : ">= 2.0.0",
-      "graphviz"      : ">= 2.0.0",
-      "importusage"   : ">= 0.0.1",
-      "redblacktree"  : ">= 0.0.1",
-      "showflatcurry" : ">= 0.0.1",
-      "gui"           : ">= 2.0.0"
-  },
-  "compilerCompatibility": {
-    "pakcs": " >= 2.0.0, < 3.0.0",
-    "kics2": " >= 2.0.0, < 3.0.0"
+      "base"          : ">= 3.0.0, < 4.0.0",
+      "addtypes"      : ">= 3.0.0, < 4.0.0",
+      "cass-analysis" : ">= 3.0.0, < 4.0.0",
+      "cass"          : ">= 3.0.0, < 4.0.0",
+      "currypath"     : ">= 3.0.0, < 4.0.0",
+      "directory"     : ">= 3.0.0, < 4.0.0",
+      "filepath"      : ">= 3.0.0, < 4.0.0",
+      "flatcurry"     : ">= 3.0.0, < 4.0.0",
+      "graphviz"      : ">= 3.0.0, < 4.0.0",
+      "gui"           : ">= 3.0.0, < 4.0.0",
+      "importusage"   : ">= 3.0.0, < 4.0.0",
+      "redblacktree"  : ">= 3.0.0, < 4.0.0",
+      "showflatcurry" : ">= 3.0.0, < 4.0.0",
+      "time"          : ">= 3.0.0, < 4.0.0"
   },
   "source": {
     "git": "https://git.ps.informatik.uni-kiel.de/curry-packages/currybrowse.git",

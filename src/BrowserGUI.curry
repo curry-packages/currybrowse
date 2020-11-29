@@ -3,43 +3,42 @@
 --- programs.
 ---
 --- @author Michael Hanus
---- @version December 2018
+--- @version November 2020
 ---------------------------------------------------------------------
 
 module BrowserGUI where
 
-import Directory
-import Distribution    ( curryCompiler )
-import FileGoodies
-import FilePath        ( (</>) )
+import Curry.Compiler.Distribution ( curryCompiler )
+import Data.IORef
+import Data.List          ( delete, isPrefixOf, sortBy, union )
+import Data.Maybe
+import System.CPUTime     ( getCPUTime, getElapsedTime )
+
+import Data.Time          ( toCalendarTime, calendarTimeToString )
 import FlatCurry.Types
 import FlatCurry.Files
 import FlatCurry.Goodies
 import FlatCurry.Show
-import GUI
-import Imports
-import IOExts
-import List            ( isPrefixOf, delete, union )
-import Maybe
-import Read
-import Sort            ( sortBy )
-import System
-import Time            ( toCalendarTime, calendarTimeToString )
+import Graphics.UI
+import System.Directory
+import System.FilePath    ( (</>) )
 
-import Analysis.Types   ( AOutFormat(..) )
-import CASS.Doc         ( getAnalysisDoc )
-import CASS.Server      ( initializeAnalysisSystem, analyzeModuleForBrowser )
-import CASS.Registry    ( functionAnalysisInfos )
-import System.CurryPath ( getLoadPathForModule, modNameToPath
-                        , stripCurrySuffix )
-import ImportUsage      ( showImportCalls )
-import ShowFlatCurry    ( funcModule, leqFunc )
-import ShowDotGraph     ( getDotViewCmd, setDotViewCmd )
+import Analysis.Types     ( AOutFormat(..) )
+import CASS.Doc           ( getAnalysisDoc )
+import CASS.Server        ( initializeAnalysisSystem, analyzeModuleForBrowser )
+import CASS.Registry      ( functionAnalysisInfos )
+import System.CurryPath   ( getLoadPathForModule, modNameToPath
+                          , stripCurrySuffix )
+import System.Environment ( getArgs )
+import ImportUsage        ( showImportCalls )
+import ShowFlatCurry      ( funcModule, leqFunc )
+import ShowDotGraph       ( getDotViewCmd, setDotViewCmd )
 
 import AnalysisTypes
 import BrowserAnalysis
 import BrowsePackageConfig            ( packagePath, packageVersion )
 import CurryBrowseAnalysis.Dependency ( callsDirectly,indirectlyDependent )
+import Imports
 
 ---------------------------------------------------------------------
 -- Set this constant to True if the execution times of the main operations
@@ -262,8 +261,8 @@ getAllFunctions :: IORef GuiState -> (String->IO ()) -> String -> IO [FuncDecl]
 getAllFunctions gs prt mod = do
   imps <- getAllImportsOfModule gs mod
   (GS _ _ mods _ _ _ _) <- readIORef gs
-  mapIO_ (readProgAndStoreIfNecessary gs prt)
-         (filter ((`elem` imps) . fst) mods)
+  mapM_ (readProgAndStoreIfNecessary gs prt)
+        (filter ((`elem` imps) . fst) mods)
   (GS _ _ newmods _ _ _ _) <- readIORef gs
   return (concatMap (progFuncs . progOfIFFP . snd)
                     (filter ((`elem` imps) . fst) newmods))
@@ -453,7 +452,7 @@ browserGUI gstate rmod rtxt names =
 
   -- Execute an I/O action safely, i.e., catch all errors and failures:
   safeIO gp act =
-    catch act (\e -> putMainMessage gp ("Failure occurred: "++showError e))
+    catch act (\e -> putMainMessage gp ("Failure occurred: " ++ show e))
 
   -- click on a module name in left module column:
   selmod gp =
@@ -463,7 +462,7 @@ browserGUI gstate rmod rtxt names =
       else putMainMessage gp "" >>
            setConfig rfun (List []) gp >>
            getTrees gstate >>= \trees ->
-           changeTrees (readNat sel) trees >>= \newtrees ->
+           changeTrees (read sel) trees >>= \newtrees ->
            storeTrees gstate newtrees >>
            setConfig rmod (List (trees2strings newtrees)) gp >>
            setValue resultwidget "" gp >>
@@ -475,7 +474,7 @@ browserGUI gstate rmod rtxt names =
     if sel==""
       then return Nothing
       else getTrees gstate >>= \trees ->
-           return (Just (fst (getTreesValue (readNat sel) trees)))
+           return (Just (fst (getTreesValue (read sel) trees)))
 
   -- execute event handler on the selected module
   -- (or show "nothing selected" message):
@@ -498,7 +497,7 @@ browserGUI gstate rmod rtxt names =
   -- show module source code:
   showSource mod gp = do
     loadpath <- getMainLoadPath gstate
-    mbprogname <- lookupFileInPath (modNameToPath mod)
+    mbprogname <- findFileWithSuffix (modNameToPath mod)
                                    [".lcurry",".curry"] loadpath
     maybe (putMainMessage gp ("Source file of '"++mod++"' does not exist!"))
           (\filename -> do
@@ -513,9 +512,9 @@ browserGUI gstate rmod rtxt names =
   -- show information about a module:
   showModuleInfo mod gp = do
     loadpath <- getMainLoadPath gstate
-    mbsrcfile <- lookupFileInPath (modNameToPath mod)
+    mbsrcfile <- findFileWithSuffix (modNameToPath mod)
                                   [".lcurry",".curry"] loadpath
-    mbfcyfile <- lookupFileInPath (flatCurryFileName mod) [""] loadpath
+    mbfcyfile <- findFileWithSuffix (flatCurryFileName mod) [""] loadpath
     srcinfo   <- getFileInfo 2 mbsrcfile
     fcyinfo   <- getFileInfo 4 mbfcyfile
     let msg = "Source file:    " ++ srcinfo ++
@@ -525,7 +524,7 @@ browserGUI gstate rmod rtxt names =
   -- returns information about a possible file:
   getFileInfo _ Nothing = return "does not exist"
   getFileInfo bls (Just fname) = do
-    fsize <- fileSize fname
+    fsize <- getFileSize fname
     ftime <- getModificationTime fname
     ctime <- toCalendarTime ftime
     return $ fname ++ take bls (repeat ' ')
@@ -577,7 +576,7 @@ browserGUI gstate rmod rtxt names =
     self <- getValue rfun gp
     if mod==Nothing || null self then done else
       getFuns gstate >>= \funs ->
-      let mainfun = funs!!(readNat self)
+      let mainfun = funs!!(read self)
           qfnames = sortBy leqQName
                       (union [funcName mainfun] (callsDirectly mainfun))
        in getAllFunctions gstate (showDoing gp) (fromJust mod) >>= \allfuns ->
@@ -591,7 +590,7 @@ browserGUI gstate rmod rtxt names =
     self <- getValue rfun gp
     if mod==Nothing || null self then done else
       getFuns gstate >>= \funs ->
-      let mainfun = funcName (funs!!(readNat self)) in
+      let mainfun = funcName (funs!!(read self)) in
       getAllFunctions gstate (showDoing gp) (fromJust mod) >>= \allfuns ->
       let qfnames = sortBy leqQName
               (union [mainfun]
@@ -625,7 +624,7 @@ browserGUI gstate rmod rtxt names =
     funs <- getFuns gstate
     if isNothing mod || null self || isNothing fana then done else do
       result <- performAnalysis (fromJust fana) (showDoing gp)
-                                (funs!!readNat self)
+                                (funs!!read self)
       showAnalysisResult result gp
 
   showAnalysisResult (MsgResult str) gp = setValue resultwidget str gp
@@ -639,7 +638,7 @@ browserGUI gstate rmod rtxt names =
     focusvalue <- getValue focusbutton gp
     funs <- getFuns gstate
     if null self || focusvalue=="0" then done
-     else showModuleAndFocusFunction gp (funcName (funs!!readNat self))
+     else showModuleAndFocusFunction gp (funcName (funs!!read self))
 
   -- focus on a function and load the source code, if necessary:
   showModuleAndFocusFunction gp (fmod,fname) =
@@ -696,8 +695,8 @@ browserGUI gstate rmod rtxt names =
     return (ana prog)
   performModuleAnalysis (SourceCodeAnalysis ana) _ mod = do
     loadpath <- getMainLoadPath gstate
-    mbfilename <- lookupFileInPath (modNameToPath mod)
-                                   [".lcurry",".curry"] loadpath
+    mbfilename <- findFileWithSuffix (modNameToPath mod)
+                                     [".lcurry",".curry"] loadpath
     maybe (return (ContentsResult
                    OtherText ("Curry source file for module \""++mod++"\" not found!")))
           (\filename -> ana filename)
@@ -797,3 +796,5 @@ getAnswer question initial processinput = do
                     exitGUI wp
 
 ---------------------------------------------------------------------
+done :: IO ()
+done = return ()

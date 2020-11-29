@@ -6,8 +6,9 @@
 
 module CurryBrowseAnalysis.CalledByAnalysis(calledBy) where
 
+import Data.List
+
 import FlatCurry.Types
-import List
 
 -- Computes the list of all functions that calls some function.
 -- Argument: a list of function declarations

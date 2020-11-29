@@ -1,15 +1,19 @@
 ------------------------------------------------------------------------------
--- Analysis for solution completeness:
--- check whether functions are solution complete, i.e., calls only
--- non-rigid functions
---
--- Michael Hanus, January 2004
+--- Analysis for solution completeness:
+--- check whether functions are solution complete, i.e., calls only
+--- non-rigid functions
+---
+--- @author Michael Hanus
+--- @version November 2020
 ------------------------------------------------------------------------------
 
-module CurryBrowseAnalysis.SolutionComplete(analyseSolutionComplete)   where
+module CurryBrowseAnalysis.SolutionComplete ( analyseSolutionComplete )
+ where
+
+import Data.List
 
 import FlatCurry.Types
-import List
+
 import CurryBrowseAnalysis.Dependency
 
 ------------------------------------------------------------------------------
