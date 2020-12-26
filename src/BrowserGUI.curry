@@ -3,7 +3,7 @@
 --- programs.
 ---
 --- @author Michael Hanus
---- @version November 2020
+--- @version December 2020
 ---------------------------------------------------------------------
 
 module BrowserGUI where
@@ -28,7 +28,7 @@ import CASS.Doc           ( getAnalysisDoc )
 import CASS.Server        ( initializeAnalysisSystem, analyzeModuleForBrowser )
 import CASS.Registry      ( functionAnalysisInfos )
 import System.CurryPath   ( getLoadPathForModule, modNameToPath
-                          , stripCurrySuffix )
+                          , runModuleAction )
 import System.Environment ( getArgs )
 import ImportUsage        ( showImportCalls )
 import ShowFlatCurry      ( funcModule, leqFunc )
@@ -49,7 +49,7 @@ showExecTime = True
 ---------------------------------------------------------------------
 -- Title and version
 title :: String
-title = "CurryBrowser (Version " ++ packageVersion ++ " of 18/05/2017)"
+title = "CurryBrowser (Version " ++ packageVersion ++ " of 26/12/2020)"
 
 ---------------------------------------------------------------------
 -- Main program: check arguments, read interfaces, and run GUI:
@@ -57,22 +57,22 @@ main :: IO ()
 main = do
   args <- getArgs
   case args of
-   [a] -> start (stripCurrySuffix a)
-   _ -> putStrLn $ "ERROR: Illegal arguments for CurryBrowser: " ++
-                   unwords args ++ "\n" ++
-                   "Usage: currybrowser <module_name>"
+   [a] -> runModuleAction startBrowser a
+   _   -> putStrLn $ "ERROR: Illegal arguments for CurryBrowser: " ++
+                     unwords args ++ "\n" ++
+                     "Usage: currybrowser <module_name>"
 
-start :: String -> IO ()
-start modpath = do
+startBrowser :: String -> IO ()
+startBrowser modname = do
   initializeAnalysisSystem
   putStr "Please be patient, reading all interfaces..."
   helptxt <- readFile (browserDir </> "README.txt")
-  mods <- getImportedInterfaces modpath
+  mods <- getImportedInterfaces modname
   putStrLn "done"
   let mainmod = progName (progOfIFFP (snd (head mods)))
       trees = [Leaf mainmod
                     (mainmod,map (moduleImports . progOfIFFP . snd) mods)]
-  stateref <- newIORef (GS trees modpath mods
+  stateref <- newIORef (GS trees modname mods
                            [] ("",OtherText,"") False Nothing)
   runInitGUI title
              (browserGUI stateref rmod rtxt (trees2strings trees))
