@@ -49,7 +49,7 @@ showExecTime = True
 ---------------------------------------------------------------------
 -- Title and version
 title :: String
-title = "CurryBrowser (Version " ++ packageVersion ++ " of 26/12/2020)"
+title = "CurryBrowser (Version " ++ packageVersion ++ " of 27/12/2020)"
 
 ---------------------------------------------------------------------
 -- Main program: check arguments, read interfaces, and run GUI:
@@ -60,7 +60,7 @@ main = do
    [a] -> runModuleAction startBrowser a
    _   -> putStrLn $ "ERROR: Illegal arguments for CurryBrowser: " ++
                      unwords args ++ "\n" ++
-                     "Usage: currybrowser <module_name>"
+                     "Usage: curry-browse <module_name>"
 
 startBrowser :: String -> IO ()
 startBrowser modname = do
