@@ -16,10 +16,12 @@ import FlatCurry.Types
 import FlatCurry.Goodies (funcName)
 import FlatCurry.Show    (showFlatFunc, showFlatProg)
 
+import AddTypes
 import Analysis.Types   (AOutFormat(..))
 import CASS.Server      (analyzeFunctionForBrowser)
 import CASS.Registry    (functionAnalysisInfos)
-import AddTypes
+import Data.GraphViz
+import ShowFlatCurry
 import System.CurryPath ( stripCurrySuffix )
 
 import AnalysisTypes
@@ -32,9 +34,6 @@ import CurryBrowseAnalysis.Dependency
 import CurryBrowseAnalysis.Indeterminism
 import CurryBrowseAnalysis.CalledByAnalysis
 import CurryBrowseAnalysis.Linearity
-
-import ShowFlatCurry
-import ShowDotGraph
 
 infix 1 `showWith`,`showWithMsg`
 

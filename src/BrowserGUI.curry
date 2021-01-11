@@ -3,7 +3,7 @@
 --- programs.
 ---
 --- @author Michael Hanus
---- @version December 2020
+--- @version January 2021
 ---------------------------------------------------------------------
 
 module BrowserGUI where
@@ -27,12 +27,12 @@ import Analysis.Types     ( AOutFormat(..) )
 import CASS.Doc           ( getAnalysisDoc )
 import CASS.Server        ( initializeAnalysisSystem, analyzeModuleForBrowser )
 import CASS.Registry      ( functionAnalysisInfos )
+import Data.GraphViz      ( getDotViewCmd, setDotViewCmd )
 import System.CurryPath   ( getLoadPathForModule, modNameToPath
                           , runModuleAction )
 import System.Environment ( getArgs )
 import ImportUsage        ( showImportCalls )
 import ShowFlatCurry      ( funcModule, leqFunc )
-import ShowDotGraph       ( getDotViewCmd, setDotViewCmd )
 
 import AnalysisTypes
 import BrowserAnalysis

@@ -93,6 +93,7 @@ combineAndResults InCompleteOr InCompleteOr = InCompleteOr
 getConstructors :: QName -> [TypeDecl] -> [ConsDecl]
 getConstructors _ [] = error "Internal compiler error: case datatype not found!"
 getConstructors cons (TypeSyn _ _ _ _ : types) = getConstructors cons types
+getConstructors cons (TypeNew _ _ _ _ : types) = getConstructors cons types
 getConstructors cons (Type _ _ _ cdecls : types) =
  if hasCons cdecls then cdecls
                    else getConstructors cons types
