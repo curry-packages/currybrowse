@@ -6,12 +6,12 @@
 -- constructor terms
 --
 -- Johannes Koj, October 2000
--- Michael Hanus, June 2006
+-- Michael Hanus, March 2021
 -----------------------------------------------------------------------------
 
-module CurryBrowseAnalysis.PatternComplete(CompletenessType(..),
-                       analyseCompleteness,
-                       analyseTotallyDefined) where
+module CurryBrowseAnalysis.PatternComplete
+  ( CompletenessType(..), analyseCompleteness, analyseTotallyDefined )
+ where
 
 import FlatCurry.Types
 import CurryBrowseAnalysis.Dependency(analyseWithDependencies)
@@ -57,15 +57,16 @@ isComplete _ (Case _ _ []) = InComplete
 -- for literal branches we usually assume that not all alternatives are provided:
 isComplete _ (Case _ _ (Branch (LPattern _)   _ : _)) = InComplete
 isComplete types (Case _ _ (Branch (Pattern cons pvs) bexp : ces)) =
-    checkAllCons (getConstructors cons types) (Branch (Pattern cons pvs) bexp : ces)
-  where
-    -- check for occurrences of all constructors in each case branch:
-    checkAllCons []    _  = Complete
-    checkAllCons (_:_) [] = InComplete
-    checkAllCons (_:_) (Branch (LPattern _)   _ : _) = InComplete -- should not occur
-    checkAllCons (c:cs) (Branch (Pattern i _) e : ps) =
-        combineAndResults (checkAllCons (removeConstructor i (c:cs)) ps)
-                          (isComplete types e)
+  checkAllCons (getConstructors cons types)
+               (Branch (Pattern cons pvs) bexp : ces)
+ where
+  -- check for occurrences of all constructors in each case branch:
+  checkAllCons []    _  = Complete
+  checkAllCons (_:_) [] = InComplete
+  checkAllCons (_:_) (Branch (LPattern _)   _ : _) = InComplete -- should not occur
+  checkAllCons (c:cs) (Branch (Pattern i _) e : ps) =
+     combineAndResults (checkAllCons (removeConstructor i (c:cs)) ps)
+                       (isComplete types e)
 isComplete types (Typed e _) = isComplete types e
 
 -- Combines the completeness results in different Or branches.
@@ -92,8 +93,10 @@ combineAndResults InCompleteOr InCompleteOr = InCompleteOr
 -- get the list of all constructors of the same datatype for a given constructor:
 getConstructors :: QName -> [TypeDecl] -> [ConsDecl]
 getConstructors _ [] = error "Internal compiler error: case datatype not found!"
-getConstructors cons (TypeSyn _ _ _ _ : types) = getConstructors cons types
-getConstructors cons (TypeNew _ _ _ _ : types) = getConstructors cons types
+getConstructors cons (TypeSyn _ _ _ _  : types) = getConstructors cons types
+getConstructors cons (TypeNew _ _ _ (NewCons nc v te) : types)  =
+ if cons == nc then [Cons nc 1 v [te]]
+               else getConstructors cons types
 getConstructors cons (Type _ _ _ cdecls : types) =
  if hasCons cdecls then cdecls
                    else getConstructors cons types
