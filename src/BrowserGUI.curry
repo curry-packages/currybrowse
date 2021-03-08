@@ -3,7 +3,7 @@
 --- programs.
 ---
 --- @author Michael Hanus
---- @version January 2021
+--- @version March 2021
 ---------------------------------------------------------------------
 
 module BrowserGUI where
@@ -49,7 +49,7 @@ showExecTime = True
 ---------------------------------------------------------------------
 -- Title and version
 title :: String
-title = "CurryBrowser (Version " ++ packageVersion ++ " of 27/12/2020)"
+title = "CurryBrowser (Version " ++ packageVersion ++ " of 08/03/2021)"
 
 ---------------------------------------------------------------------
 -- Main program: check arguments, read interfaces, and run GUI:
@@ -433,16 +433,16 @@ browserGUI gstate rmod rtxt names =
   showBusy handler gp = do
      setConfig rstatus (Background "red") gp
      setConfig rstatus (Text "Status: running") gp
-     let elapsed = curryCompiler=="pakcs"
+     let elapsed = curryCompiler == "pakcs"
      time1 <- if elapsed then getElapsedTime else getCPUTime
      handler gp
      time2 <- if elapsed then getElapsedTime else getCPUTime
      setConfig rstatus
        (Text $ if showExecTime
-               then "Status: ready (" ++
-                    (if elapsed then "elapsed time: " else "exec time: ") ++
-                    show(time2-time1) ++ " msecs)"
-               else "Status: ready") gp
+                 then "Status: ready (" ++
+                      (if elapsed then "elapsed time: " else "exec time: ") ++
+                      show(time2-time1) ++ " msecs)"
+                 else "Status: ready") gp
      setConfig rstatus (Background "green") gp
 
   showMBusy handler gp = showBusy handler gp >> return []
@@ -457,7 +457,7 @@ browserGUI gstate rmod rtxt names =
   -- click on a module name in left module column:
   selmod gp =
     getValue rmod gp >>= \sel ->
-    if sel==""
+    if null sel
       then done
       else putMainMessage gp "" >>
            setConfig rfun (List []) gp >>
@@ -471,7 +471,7 @@ browserGUI gstate rmod rtxt names =
   -- get the name of the selected module (or Nothing in case of no selection):
   getSelectedModName gp = do
     sel <- getValue rmod gp
-    if sel==""
+    if null sel
       then return Nothing
       else getTrees gstate >>= \trees ->
            return (Just (fst (getTreesValue (read sel) trees)))
