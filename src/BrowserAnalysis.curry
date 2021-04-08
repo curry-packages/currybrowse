@@ -21,7 +21,7 @@ import Analysis.Types   (AOutFormat(..))
 import CASS.Server      (analyzeFunctionForBrowser)
 import CASS.Registry    (functionAnalysisInfos)
 import Data.GraphViz
-import ShowFlatCurry
+import FlatCurry.ShowIntMod
 import System.CurryPath ( stripCurrySuffix )
 
 import AnalysisTypes

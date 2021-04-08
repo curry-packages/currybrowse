@@ -32,7 +32,7 @@ import System.CurryPath   ( getLoadPathForModule, modNameToPath
                           , runModuleAction )
 import System.Environment ( getArgs )
 import ImportUsage        ( showImportCalls )
-import ShowFlatCurry      ( funcModule, leqFunc )
+import FlatCurry.ShowIntMod ( funcModule, leqFunc )
 
 import AnalysisTypes
 import BrowserAnalysis
