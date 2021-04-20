@@ -24,7 +24,7 @@ import Data.GraphViz
 import FlatCurry.ShowIntMod
 import System.CurryPath ( stripCurrySuffix )
 
-import AnalysisTypes
+import BrowserAnalysisTypes
 import Imports
 import CurryBrowseAnalysis.Overlapping
 import CurryBrowseAnalysis.PatternComplete

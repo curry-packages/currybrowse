@@ -3,7 +3,7 @@
 --- programs.
 ---
 --- @author Michael Hanus
---- @version March 2021
+--- @version April 2021
 ---------------------------------------------------------------------
 
 module BrowserGUI where
@@ -34,7 +34,7 @@ import System.Environment ( getArgs )
 import ImportUsage        ( showImportCalls )
 import FlatCurry.ShowIntMod ( funcModule, leqFunc )
 
-import AnalysisTypes
+import BrowserAnalysisTypes
 import BrowserAnalysis
 import BrowsePackageConfig            ( packagePath, packageVersion )
 import CurryBrowseAnalysis.Dependency ( callsDirectly,indirectlyDependent )
@@ -49,7 +49,7 @@ showExecTime = True
 ---------------------------------------------------------------------
 -- Title and version
 title :: String
-title = "CurryBrowser (Version " ++ packageVersion ++ " of 08/03/2021)"
+title = "CurryBrowser (Version " ++ packageVersion ++ " of 20/04/2021)"
 
 ---------------------------------------------------------------------
 -- Main program: check arguments, read interfaces, and run GUI:

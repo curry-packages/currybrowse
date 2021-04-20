@@ -3,9 +3,10 @@
 --- in the browser.
 -------------------------------------------------------------------------------
 
-module AnalysisTypes(FunctionAnalysis(..),AnalysisResult(..),
-                     ModuleAnalysis(..),ModuleAnalysisResult(..),
-                     ContentsKind(..)) where
+module BrowserAnalysisTypes
+  ( FunctionAnalysis(..), AnalysisResult(..), ModuleAnalysis(..)
+  , ModuleAnalysisResult(..), ContentsKind(..)
+  ) where
 
 import FlatCurry.Types
 
