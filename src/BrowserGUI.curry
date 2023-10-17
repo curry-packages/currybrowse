@@ -3,11 +3,12 @@
 --- programs.
 ---
 --- @author Michael Hanus
---- @version April 2021
+--- @version October 2023
 ---------------------------------------------------------------------
 
 module BrowserGUI where
 
+import Control.Monad      ( unless )
 import Curry.Compiler.Distribution ( curryCompiler )
 import Data.IORef
 import Data.List          ( delete, isPrefixOf, sortBy, union )
@@ -49,7 +50,7 @@ showExecTime = True
 ---------------------------------------------------------------------
 -- Title and version
 title :: String
-title = "CurryBrowser (Version " ++ packageVersion ++ " of 20/04/2021)"
+title = "CurryBrowser (Version " ++ packageVersion ++ " of 17/10/2023)"
 
 ---------------------------------------------------------------------
 -- Main program: check arguments, read interfaces, and run GUI:
@@ -62,11 +63,14 @@ main = do
                      unwords args ++ "\n" ++
                      "Usage: curry-browse <module_name>"
 
+readmeFile :: String
+readmeFile = "README.md"
+
 startBrowser :: String -> IO ()
 startBrowser modname = do
   initializeAnalysisSystem
   putStr "Please be patient, reading all interfaces..."
-  helptxt <- readFile (browserDir </> "README.txt")
+  helptxt <- readFileInBrowserDir readmeFile
   mods <- getImportedInterfaces modname
   putStrLn "done"
   let mainmod = progName (progOfIFFP (snd (head mods)))
@@ -305,9 +309,9 @@ readProgAndStore gs prt mod = do
 -- read a FlatCurry program and store if not already done
 readProgAndStoreIfNecessary :: IORef GuiState -> (String -> IO ()) ->
                                (String,InterfaceOrFlatProg) -> IO ()
-readProgAndStoreIfNecessary _ _ (_,FP _) = done
+readProgAndStoreIfNecessary _  _   (_,FP _)    = return ()
 readProgAndStoreIfNecessary gs prt (name,IF _) =
-   readProgAndStore gs prt name >> done
+   readProgAndStore gs prt name >> return ()
 
 -- find a function declaration in a list of fdecls for a given name:
 findDecl4name :: [FuncDecl] -> QName -> FuncDecl
@@ -381,7 +385,7 @@ browserGUI gstate rmod rtxt names =
             Label [FillX],
             MenuButton
               [Text "Help...",
-               Menu [MButton (showMBusy (help "README.txt"))
+               Menu [MButton (showMBusy (help readmeFile))
                              "About CurryBrowser",
                      MSeparator,
                      MButton (showMBusy (help "Help.txt"))
@@ -408,9 +412,7 @@ browserGUI gstate rmod rtxt names =
 
   saveMainText gp = do
     file <- getSaveFile
-    if null file
-     then done
-     else getValue rtxt gp >>= writeFile file
+    unless (null file) $ getValue rtxt gp >>= writeFile file
 
   -- put a message in main contents widget:
   putMainMessage gp msg = do
@@ -421,13 +423,12 @@ browserGUI gstate rmod rtxt names =
   setViewDot _ = do
      oldcmd <- getDotViewCmd
      getAnswer "Command to view dot files:" oldcmd
-               (\cmd->if oldcmd==cmd then done
-                                     else setDotViewCmd cmd)
+               (\cmd -> unless (oldcmd==cmd) $ setDotViewCmd cmd)
      return []
 
   -- show info texts:
   help localhelpfile gp =
-    readFile (browserDir </> localhelpfile) >>= putMainMessage gp
+    readFileInBrowserDir localhelpfile >>= putMainMessage gp
 
   -- show business while executing an event handler:
   showBusy handler gp = do
@@ -455,18 +456,17 @@ browserGUI gstate rmod rtxt names =
     catch act (\e -> putMainMessage gp ("Failure occurred: " ++ show e))
 
   -- click on a module name in left module column:
-  selmod gp =
-    getValue rmod gp >>= \sel ->
-    if null sel
-      then done
-      else putMainMessage gp "" >>
-           setConfig rfun (List []) gp >>
-           getTrees gstate >>= \trees ->
-           changeTrees (read sel) trees >>= \newtrees ->
-           storeTrees gstate newtrees >>
-           setConfig rmod (List (trees2strings newtrees)) gp >>
-           setValue resultwidget "" gp >>
-           setValue rmod sel gp
+  selmod gp = do
+    sel <- getValue rmod gp
+    unless (null sel) $ do
+      putMainMessage gp ""
+      setConfig rfun (List []) gp
+      trees <- getTrees gstate
+      newtrees <- changeTrees (read sel) trees
+      storeTrees gstate newtrees
+      setConfig rmod (List (trees2strings newtrees)) gp
+      setValue resultwidget "" gp
+      setValue rmod sel gp
 
   -- get the name of the selected module (or Nothing in case of no selection):
   getSelectedModName gp = do
@@ -480,7 +480,7 @@ browserGUI gstate rmod rtxt names =
   -- (or show "nothing selected" message):
   executeForModule modhandler gp =
     getSelectedModName gp >>= \mod ->
-    if mod==Nothing
+    if isNothing mod
       then putMainMessage gp "No module selected!"
       else modhandler (fromJust mod) gp
 
@@ -574,30 +574,30 @@ browserGUI gstate rmod rtxt names =
   selectDirectCalls gp = do
     mod <- getSelectedModName gp
     self <- getValue rfun gp
-    if mod==Nothing || null self then done else
-      getFuns gstate >>= \funs ->
+    unless (isNothing mod || null self) $ do
+      funs <- getFuns gstate
       let mainfun = funs!!(read self)
           qfnames = sortBy leqQName
                       (union [funcName mainfun] (callsDirectly mainfun))
-       in getAllFunctions gstate (showDoing gp) (fromJust mod) >>= \allfuns ->
-          storeSelectedFunctions gstate (map (findDecl4name allfuns) qfnames) >>
-          setFunctionListKind gstate False >>
-          setConfig rfun (List (map showQNameWithMod qfnames)) gp
+      allfuns <- getAllFunctions gstate (showDoing gp) (fromJust mod)
+      storeSelectedFunctions gstate (map (findDecl4name allfuns) qfnames)
+      setFunctionListKind gstate False
+      setConfig rfun (List (map showQNameWithMod qfnames)) gp
 
   -- select all functions that indirectly depend on selected function:
   selectInDirectCalls gp = do
     mod <- getSelectedModName gp
     self <- getValue rfun gp
-    if mod==Nothing || null self then done else
-      getFuns gstate >>= \funs ->
-      let mainfun = funcName (funs!!(read self)) in
-      getAllFunctions gstate (showDoing gp) (fromJust mod) >>= \allfuns ->
+    unless (isNothing mod || null self) $ do
+      funs <- getFuns gstate
+      let mainfun = funcName (funs!!(read self))
+      allfuns <- getAllFunctions gstate (showDoing gp) (fromJust mod)
       let qfnames = sortBy leqQName
               (union [mainfun]
                      (fromJust (lookup mainfun (indirectlyDependent allfuns))))
-       in storeSelectedFunctions gstate (map (findDecl4name allfuns) qfnames) >>
-          setFunctionListKind gstate False >>
-          setConfig rfun (List (map showQNameWithMod qfnames)) gp
+      storeSelectedFunctions gstate (map (findDecl4name allfuns) qfnames)
+      setFunctionListKind gstate False
+      setConfig rfun (List (map showQNameWithMod qfnames)) gp
 
   -- click on a name in function column:
   selectFunction gp = safeIO gp $ do
@@ -622,14 +622,15 @@ browserGUI gstate rmod rtxt names =
     self <- getValue rfun gp
     fana <- getCurrentFunctionAnalysis gstate
     funs <- getFuns gstate
-    if isNothing mod || null self || isNothing fana then done else do
+    unless (isNothing mod || null self || isNothing fana) $ do
       result <- performAnalysis (fromJust fana) (showDoing gp)
                                 (funs!!read self)
       showAnalysisResult result gp
 
   showAnalysisResult (MsgResult str) gp = setValue resultwidget str gp
-  showAnalysisResult (ActionResult act) gp =
-    act >>= \str -> setValue resultwidget str gp
+  showAnalysisResult (ActionResult act) gp = do
+    str <- act
+    setValue resultwidget str gp
 
 
   -- focus on a function if selected:
@@ -637,8 +638,8 @@ browserGUI gstate rmod rtxt names =
     self <- getValue rfun gp
     focusvalue <- getValue focusbutton gp
     funs <- getFuns gstate
-    if null self || focusvalue=="0" then done
-     else showModuleAndFocusFunction gp (funcName (funs!!read self))
+    unless (null self || focusvalue=="0") $
+      showModuleAndFocusFunction gp (funcName (funs!!read self))
 
   -- focus on a function and load the source code, if necessary:
   showModuleAndFocusFunction gp (fmod,fname) =
@@ -646,19 +647,19 @@ browserGUI gstate rmod rtxt names =
     if fmod == cntmod
     then getMainContents gstate >>= \(ct,cnt) ->
          let row = findFunDeclInProgText ct cnt (fmod,fname)
-          in if row==0 then done else seeText rtxt (row,1) gp
+         in unless (row==0) $ seeText rtxt (row,1) gp
     else showSource fmod gp >>
          getMainContents gstate >>= \(ct,cnt) ->
          let row = findFunDeclInProgText ct cnt (fmod,fname)
-          in if row==0 then done else seeText rtxt (row,1) gp
+         in unless (row==0) $ seeText rtxt (row,1) gp
 
   -- analyze all functions in the function column:
   analyzeAllFuns explanation analysis gp = safeIO gp $ do
     mod <- getSelectedModName gp
-    if mod==Nothing then done else do
+    unless (isNothing mod) $ do
       modfuns <- getFunctionListKind gstate
       let modName = fromJust mod
-      if modfuns then done else showExportedFuns modName gp
+      unless modfuns $ showExportedFuns modName gp
       funs <- getFuns gstate
       setValue resultwidget explanation gp
       anaresults <- performAllAnalysis analysis (showDoing gp) modName funs
@@ -670,10 +671,10 @@ browserGUI gstate rmod rtxt names =
   -- analyze all functions with Curry Analysis Server System:
   analyzeAllFunsWithCASS analysisName explanation gp = safeIO gp $ do
     mod <- getSelectedModName gp
-    if mod==Nothing then done else do
+    unless (isNothing mod) $ do
       let modName = fromJust mod
       modfuns <- getFunctionListKind gstate
-      if modfuns then done else showExportedFuns modName gp
+      unless modfuns $ showExportedFuns modName gp
       funs <- getFuns gstate
       mbdoc <- getAnalysisDoc analysisName
       setValue resultwidget (maybe explanation id mbdoc) gp
@@ -763,9 +764,9 @@ findFirstDeclLine f (l:ls) n =
      if isPrefixOf f l then n else findFirstDeclLine f ls (n+1)
 
 ---------------------------------------------------------------------
--- directory with browser sources:
-browserDir :: String
-browserDir = packagePath
+-- Reads file in the directory of the browser package.
+readFileInBrowserDir :: String -> IO String
+readFileInBrowserDir f = readFile (packagePath </> f)
 
 -- order qualified names by basename first:
 leqQName :: QName -> QName -> Bool
@@ -796,5 +797,3 @@ getAnswer question initial processinput = do
                     exitGUI wp
 
 ---------------------------------------------------------------------
-done :: IO ()
-done = return ()
