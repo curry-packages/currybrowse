@@ -23,7 +23,7 @@
       "time"          : ">= 3.0.0, < 4.0.0"
   },
   "source": {
-    "git": "https://git.ps.informatik.uni-kiel.de/curry-packages/currybrowse.git",
+    "git": "https://github.com/curry-packages/currybrowse.git",
     "tag": "$version"
   },
   "configModule": "BrowsePackageConfig",
