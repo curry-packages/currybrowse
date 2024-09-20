@@ -50,7 +50,7 @@ showExecTime = True
 ---------------------------------------------------------------------
 -- Title and version
 title :: String
-title = "CurryBrowser (Version " ++ packageVersion ++ " of 17/10/2023)"
+title = "CurryBrowser (Version " ++ packageVersion ++ " of 20/09/2024)"
 
 ---------------------------------------------------------------------
 -- Main program: check arguments, read interfaces, and run GUI:

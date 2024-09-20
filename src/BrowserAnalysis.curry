@@ -10,22 +10,21 @@ module BrowserAnalysis
   , viewDependencyGraph )
  where
 
-import Data.List   ( intersperse, nub, (\\) )
+import Data.List            ( nub, (\\) )
 
 import FlatCurry.Types
-import FlatCurry.Goodies (funcName)
-import FlatCurry.Show    (showFlatFunc, showFlatProg)
+import FlatCurry.Goodies    ( funcName )
+import FlatCurry.Show       ( showFlatFunc, showFlatProg )
 
-import AddTypes
-import Analysis.Types   (AOutFormat(..))
-import CASS.Server      (analyzeFunctionForBrowser)
-import CASS.Registry    (functionAnalysisInfos)
+import AddTypes             ( addTypeSignatures )
+import Analysis.Types       ( AOutFormat(..) )
+import CASS.Server          ( analyzeFunctionForBrowser )
+import CASS.Registry        ( functionAnalysisInfos )
 import Data.GraphViz
 import FlatCurry.ShowIntMod
-import System.CurryPath ( stripCurrySuffix )
+import System.CurryPath     ( runModuleActionQuiet )
 
 import BrowserAnalysisTypes
-import Imports
 import CurryBrowseAnalysis.Overlapping
 import CurryBrowseAnalysis.PatternComplete
 import CurryBrowseAnalysis.SolutionComplete
@@ -61,10 +60,10 @@ moduleAnalyses =
 
 addTypes :: String -> IO ModuleAnalysisResult
 addTypes fname
- | take 7 (reverse fname) == "yrrucl."
+  | take 7 (reverse fname) == "yrrucl."
   = return (ContentsResult OtherText "Can't add types to literate programs")
- | otherwise
-  = do prog <- addTypeSignatures (stripCurrySuffix fname)
+  | otherwise
+  = do prog <- runModuleActionQuiet addTypeSignatures fname
        return (ContentsResult CurryProg prog)
 
 -----------------------------------------------------------------------------
