@@ -29,6 +29,8 @@ they have no effect.
 Further details can be found in a
 [paper on CurryBrowser](http://www.informatik.uni-kiel.de/~mh/papers/WLPE06.html)
 
+![Snapshot of the CurryBrowser GUI](https://cpm.curry-lang.org/PACKAGES/currybrowse-3.0.0/images/currybrowser.jpg)
+
 
 Software requirements:
 ----------------------
