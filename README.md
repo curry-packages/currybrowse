@@ -17,8 +17,8 @@ in Curry using libraries for GUI programming and meta-programming.
 After installing the CurryBrowser with the Curry package manager,
 it can be easily invoked inside interactive environment of
 the Curry implementations
-[PAKCS](https://www.informatik.uni-kiel.de/~pakcs/) or
-[KiCS2](https://www-ps.informatik.uni-kiel.de/kics2)
+[PAKCS](https://www.curry-lang.org/pakcs/) or
+[KiCS2](https://www.curry-lang.org/kics2)
 by the command `:browse`.
 
 _Note:_
@@ -35,8 +35,8 @@ Further details can be found in a
 Software requirements:
 ----------------------
 
-* A Curry implementation like [PAKCS](https:/www.informatik.uni-kiel.de/~pakcs)
-  or [KiCS2](https://www-ps.informatik.uni-kiel.de/kics2/)
+* A Curry implementation like [PAKCS](https:/www.curry-lang.org/pakcs)
+  or [KiCS2](https://www.curry-lang.org/kics2/)
   to install and run the browser.
 * [Tcl/Tk](https://www.tcl.tk/) for running the browser GUI.
 * [dot](https://www.graphviz.org/) to visualize dependency graphs.
