@@ -2,19 +2,20 @@
 --- A few base functions for analysing dependencies in FlatCurry programs:
 ---
 --- @author Michael Hanus
---- @version November 2020
+--- @version April 2025
 -----------------------------------------------------------------------------
 
 module CurryBrowseAnalysis.Dependency
-                 (analyseWithDependencies, indirectlyDependent,
-                  funcsInExpr, callsDirectly, externalDependent,
-                  dependencyGraphs, localDependencyGraphs) where
+  ( analyseWithDependencies, indirectlyDependent
+  , funcsInExpr, callsDirectly, externalDependent
+  , dependencyGraphs, localDependencyGraphs
+  ) where
 
-import Prelude hiding ( empty )
-import Data.Maybe ( fromJust )
+import Prelude hiding  ( empty )
+import Data.Maybe      ( fromJust )
 
 import FlatCurry.Types
-import Data.Set.RBTree ( SetRBT, member, empty, insert, toList, union )
+import Data.Set        ( Set, member, empty, insert, toList, union )
 
 -- Generic global function analysis where the property of each function is a combination
 -- of a property of the function and all its dependent functions.
@@ -60,13 +61,13 @@ callsDirectly :: FuncDecl -> [QName]
 callsDirectly fun = toList (snd (directlyDependent fun))
 
 -- set of direct dependencies for a function
-directlyDependent :: FuncDecl -> (QName,SetRBT QName)
+directlyDependent :: FuncDecl -> (QName,Set QName)
 directlyDependent (Func f _ _ _ (Rule _ e))   = (f,funcSetOfExpr e)
 directlyDependent (Func f _ _ _ (External _)) = (f,emptySet)
 
 -- compute the transitive closure of all dependencies based on a list of
 -- direct dependencies:
-depsClosure :: [(QName,SetRBT QName)] -> [(QName,SetRBT QName)]
+depsClosure :: [(QName,Set QName)] -> [(QName,Set QName)]
 depsClosure directdeps = map (\(f,ds)->(f,closure ds (toList ds)))
                              directdeps
  where
@@ -106,7 +107,7 @@ localDependencyGraphs funs =
 
 -- compute the transitive closure of all local dependencies based on a list of
 -- direct dependencies:
-localDepsClosure :: [(QName,SetRBT QName)] -> [(QName,SetRBT QName)]
+localDepsClosure :: [(QName,Set QName)] -> [(QName,Set QName)]
 localDepsClosure directdeps =
   map (\(f,ds)->(f,closure (fst f) ds (toList ds))) directdeps
  where
@@ -125,7 +126,7 @@ funcsInExpr e = toList (funcSetOfExpr e)
 
 -- Gets the set of all functions (including partially applied functions)
 -- called in an expression:
-funcSetOfExpr :: Expr -> SetRBT QName
+funcSetOfExpr :: Expr -> Set QName
 funcSetOfExpr (Var _) = emptySet
 funcSetOfExpr (Lit _) = emptySet
 funcSetOfExpr (Comb ct f es) =
@@ -144,11 +145,11 @@ isConstructorComb ct = case ct of
   ConsPartCall _ -> True
   _              -> False
 
-unionMap :: (a -> SetRBT QName) -> [a] -> SetRBT QName
+unionMap :: (a -> Set QName) -> [a] -> Set QName
 unionMap f = foldr union emptySet . map f
 
-emptySet :: SetRBT QName
-emptySet = empty leqQName
+emptySet :: Set QName
+emptySet = empty
 
 leqQName :: QName -> QName -> Bool
 leqQName (m1,n1) (m2,n2) = m1 ++ ('.':n1) <= m2 ++ ('.':n2)
