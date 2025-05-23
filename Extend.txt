@@ -9,8 +9,7 @@ The ideas of this infrastructure are described in this paper:
 M. Hanus: A Generic Analysis Environment for Declarative Programs
 Proc. of the International Workshop on Curry and Functional Logic
 Programming (WCFLP 2005), pp. 43-48, ACM Press, 2005
-http://www.informatik.uni-kiel.de/~mh/publications/papers/WCFLP05.html
-
+https://www.michaelhanus.de/papers/WCFLP05.html
 
 In the current implementation of CurryBrowser, the following steps
 are necessary to integrate a new program analysis (here, BROWSERDIR
